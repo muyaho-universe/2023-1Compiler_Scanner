@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class SmallScan {
     public static void main(String[] args) {
@@ -9,17 +11,25 @@ public class SmallScan {
 
     private void run(String[] args){
         String testCaseString = "../test/" + args[0];
-        String str;
+        String oneLine = null;
 
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(testCaseString));
-            while ((str = bufferedReader.readLine()) != null) {
-                String[] oneLine = str.split(" |\n|\t");
-                System.out.println(oneLine[1]);
-            }
-//            System.out.println(args[0]);
+            byte[] content = Files.readAllBytes(Path.of(testCaseString));
+            oneLine = new String(content);
+            scan(oneLine);
         } catch (Exception e){
-            System.out.println("Failed to open the file");
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    private void scan(String oneLine){
+        try {
+            for (int i = 0; i < oneLine.length(); i++){
+
+            }
+        } catch (Exception e) {
+
         }
 
     }
