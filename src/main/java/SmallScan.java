@@ -49,14 +49,16 @@ public class SmallScan {
 
                         } catch (Exception e){
                             if(keyword.contains(tempToken)){
-//                                System.out.println("KEYWORD: " + tempToken);
+                                System.out.println("KEYWORD: " + tempToken);
                             }
                             else if (operator.contains(tempToken)){
-//                                System.out.println("OPERATOR: " + tempToken);
+                                System.out.println("OPERATOR: " + tempToken);
                             }
                             else {
                                 ArrayList<String> strings = tokenize(tempToken);
+                                System.out.println("String length: " + strings.size());
                                 for (String tmp : strings){
+                                    System.out.println("TMP: " + tmp);
                                     scan(tmp);
                                 }
                             }
@@ -78,21 +80,25 @@ public class SmallScan {
     }
 
     private ArrayList<String> tokenize(String token){
-        ArrayList<String> tokenList = new ArrayList<>();
+        ArrayList<String> tokenList = new ArrayList<String>();
         String tempToken = "";
         for (int i = 0; i < token.length(); i++){
-            Character tempCharacter = token.charAt(i);
-            if(operator.contains(tempCharacter)){
+            Character t = token.charAt(i);
+            String tempStr = t.toString();
+
+            if(operator.contains(tempStr)){
                 if(!tempToken.isBlank()){
                     tokenList.add(tempToken);
                 }
-                tokenList.add(tempCharacter.toString());
+                tokenList.add(tempStr);
+                tempToken = "";
+            }
+            else {
+                tempToken += tempStr;
             }
         }
+        tokenList.add(tempToken);
 
-        for (String t: tokenList){
-
-        }
 
         return tokenList;
     }
