@@ -1,6 +1,9 @@
-public class Identifier implements Lexeme{
+public class Identifier extends Token{
+    String type;
+    String value;
+
     @Override
-    public String getLex(String arg) {
-        return null;
+    public void getToken() {
+        System.out.println(type + " : " + value);
     }
 }

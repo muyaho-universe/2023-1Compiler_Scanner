@@ -49,7 +49,7 @@ public class SmallScan {
 
                         } catch (Exception e){
                             if(keyword.contains(tempToken)){
-                                System.out.println("KEYWORD: " + tempToken);
+
                             }
                             else if (operator.contains(tempToken)){
                                 System.out.println("OPERATOR: " + tempToken);

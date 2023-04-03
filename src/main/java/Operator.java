@@ -1,5 +1,4 @@
-public class Number extends Token{
-
+public class Operator extends Token{
     String type;
     String value;
 

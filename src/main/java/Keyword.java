@@ -1,5 +1,4 @@
-public class Number extends Token{
-
+public class Keyword extends Token{
     String type;
     String value;
 
