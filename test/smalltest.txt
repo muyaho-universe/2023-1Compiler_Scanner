@@ -7,7 +7,7 @@ program Exercise
         end
         elseif (Time_10_24 < 20)
             begin
-                Minute_In_Hour = Hour_In_Day * 60;
+                Minute_In_Hour = Hour_In_Day * 60 ;
                 display("Good Day. Peace_to_you.");
             end
 program_end
