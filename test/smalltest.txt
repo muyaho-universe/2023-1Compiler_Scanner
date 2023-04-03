@@ -1,0 +1,13 @@
+program Exercise
+    program_begin
+        integer Time_10_24 = 2206, Hour_In_Day = 0, Minute_In_Hour;
+        if (Time_10_24 < 10)
+            begin display( );
+            Hour_In_Day = 24;
+        end
+        elseif (Time_10_24 < 20)
+            begin
+                Minute_In_Hour = Hour_In_Day * 60;
+                display("Good Day. Peace_to_you.");
+            end
+program_end
