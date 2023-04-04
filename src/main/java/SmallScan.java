@@ -45,10 +45,11 @@ public class SmallScan {
             Character oneChar = oneLine.charAt(i);
             currentType = detectCurrentType(oneChar);
             currentState = calcuateState(previousState, currentType);
-            System.out.println(i + "- current state: " + currentState + " | current type: " + currentType + " | previous state: " + previousState + " | previous string: " + previousString + " | one char: " + oneChar);
+//            System.out.println(i + "- current state: " + currentState + " | current type: " + currentType + " | previous state: " + previousState + " | previous string: " + previousString + " | one char: " + oneChar);
             if(isDelimiter(currentState)){
                 if(currentState.equals("2")){
                     previousString += "\"";
+                    i++;
                     StringLiteral str = new StringLiteral("STRING_LITERAL", previousString);
                     tokens.add(str);
                 }
@@ -111,10 +112,11 @@ public class SmallScan {
                     tokens.add(num);
                 }
                 previousString = "";
-                if (!currentState.equals("2") && !isWhiteSpace(oneChar))
-                    previousString += oneChar.toString();
-                currentState = "0";
-                previousState = "0";
+                previousState = calcuateState("0", detectCurrentType(oneLine.charAt(i)));
+                if(!previousState.equals("8")){
+                    Character ch = oneLine.charAt(i);
+                    previousString += ch.toString();
+                }
             }
             else{
                 if(!currentState.equals("8"))
@@ -130,7 +132,6 @@ public class SmallScan {
                 Character ttype = detectCurrentType(previousString.charAt(previousString.length() - 1));
                 tempState = calcuateState(previousState, ttype);
             }
-            System.out.println("temp state: " + tempState);
             if(tempState.equals("1")){
                 StringLiteral str = new StringLiteral("STRING_LITEAL", previousString);
                 tokens.add(str);
