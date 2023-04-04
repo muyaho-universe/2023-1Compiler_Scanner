@@ -19,6 +19,6 @@ public class Token {
     }
 
     public void getToken(){
-        System.out.println(type + " " + value);
+        System.out.println(type + " : " + value);
     }
 }

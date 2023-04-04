@@ -9,8 +9,8 @@ import java.util.Map;
 public class SmallScan {
     ArrayList<Character> whiteSpace = new ArrayList<>(Arrays.asList(' ', '\n', '\t'));
     ArrayList<String> keyword = new ArrayList<>(Arrays.asList("program", "program_begin", "integer", "if", "begin", "display", "end", "elesif", "else", "while", "break", "program_end"));
-    ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=", "(", ")", ",", ".", ";"));
-    
+    ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=", "(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
+
 
     public static void main(String[] args) {
         SmallScan smallScan = new SmallScan();
@@ -32,61 +32,61 @@ public class SmallScan {
     }
 
     private void scan(String oneLine){
-        try {
-            String tempToken = "";
-            ArrayList<Token> tokens = new ArrayList<>();
-            for (int i = 0; i < oneLine.length(); i++){
-                Character oneChar = oneLine.charAt(i);
-                if (whiteSpace.contains(oneChar)){
-                    if(!tempToken.isBlank()){
-                        try {
-                            Double t = Double.parseDouble(tempToken);
-                            if (t % 1 == 0.0){
-                                int tI = (int) Math.round(t);
-                                Number number = new Number("NUMBER", Integer.toString(tI));
-                                tokens.add(number);
-//                                System.out.println("Number: " + tI);
-                            }
-                            else {
-                                Number number = new Number("NUMBER", Double.toString(t));
-                                tokens.add(number);
-//                                System.out.println("Number: " + t);
-                            }
+        ArrayList<Token> tokens = new ArrayList<>();
+        int i = 0;
+        String previousString = "";
+        char previousType = 'N';
+        char currentType = 'N';
+        // L: Letter, O: Operator, Q: Quote, D: Digit, W: White space, N: Null
+        for(i = 0; i < oneLine.length(); i++){
+            Character oneChar = oneLine.charAt(i);
+            if(previousType == 'N'){    // from q0
+                currentType = detectCurrentType(oneChar);
+                previousType = currentType;
+                previousString += oneChar;
+            }
+            else {
+                currentType = detectCurrentType(oneChar);
+                if(previousType == currentType){
 
-                        } catch (Exception e){
-                            if (tempToken.charAt(0) == '\"'){
-                                while(oneLine.charAt(i) != '\"'){
-                                    tempToken += oneLine.charAt(i);
-                                    i++;
-                                }
-                                tempToken += "\"";
-                                StringLiteral stringLiteral = new StringLiteral("String_Literal", tempToken);
-                                tokens.add(stringLiteral);
-                            }
-                            else if (operator.contains(tempToken)){
-                                Operator op = new Operator("OPERATOR", tempToken);
-                                tokens.add(op);
-                            }
-                            else if(keyword.contains(tempToken)){
-                                Keyword keyword1 = new Keyword("KEYWORD", tempToken);
-                                tokens.add(keyword1);
-                            }
-                        }
-
-
-                    }
-                    tempToken = "";
-                }
-
-                else {
-                    tempToken += oneChar;
                 }
             }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
         }
+        printTokens(tokens);
+    }
 
+    private void printTokens(ArrayList<Token> tokens){
+        for(Token each : tokens){
+            each.getToken();
+        }
+    }
+
+    private boolean isLetter(Character ch){
+        if (('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z')) return true;
+        return false;
+    }
+
+    private boolean isDigit(Character ch){
+        if('0' <= ch && ch <= '9') return true;
+        return false;
+    }
+
+    private boolean isOperator(Character ch){
+        if(operator.contains(ch.toString())) return true;
+        return false;
+    }
+
+    private boolean isWhiteSpace(Character ch){
+        if(whiteSpace.contains(ch)) return true;
+        return false;
+    }
+
+    private Character detectCurrentType(Character ch){
+        if(isDigit(ch)) return 'D';
+        else if (isLetter(ch)) return 'L';
+        else if (isOperator(ch)) return 'O';
+        else if (isWhiteSpace(ch)) return  'W';
+        else return 'N';
     }
 //
 //    private ArrayList<String> tokenize(String token){
