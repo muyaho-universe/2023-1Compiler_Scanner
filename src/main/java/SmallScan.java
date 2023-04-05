@@ -12,6 +12,8 @@ public class SmallScan {
     ArrayList<String> keyword = new ArrayList<>(Arrays.asList("program", "program_begin", "integer", "if", "begin", "display", "end", "elesif", "else", "while", "break", "program_end"));
     ArrayList<String> overlapOperator = new ArrayList<>(Arrays.asList("<",">", "=", "!"));
     ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=","(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
+    ArrayList<String> specialChar = new ArrayList<>(Arrays.asList("(", ")", ","));
+    ArrayList<String> statementTerminator = new ArrayList<>(Arrays.asList(";"));
     ArrayList<Token> tokens = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -20,7 +22,7 @@ public class SmallScan {
     }
 
     private void run(String[] args){
-        String testCaseString = "../test/" + args[0];
+        String testCaseString = "./" + args[0];
         String oneLine = null;
 
         try {
@@ -45,7 +47,6 @@ public class SmallScan {
             Character oneChar = oneLine.charAt(i);
             currentType = detectCurrentType(oneChar);
             currentState = calcuateState(previousState, currentType);
-//            System.out.println(i + "- current state: " + currentState + " | current type: " + currentType + " | previous state: " + previousState + " | previous string: " + previousString + " | one char: " + oneChar);
             if(isDelimiter(currentState)){
                 if(currentState.equals("2")){
                     previousString += "\"";
@@ -54,6 +55,8 @@ public class SmallScan {
                     tokens.add(str);
                 }
                 else if (currentState.equals("4")) {
+                    previousString += oneChar.toString();
+                    i++;
                     if (operator.contains(previousString)){
                         Operator op = new Operator("OPERATOR", previousString);
                         tokens.add(op);
@@ -61,12 +64,31 @@ public class SmallScan {
                     else {
                         Character t1 = previousString.charAt(0);
                         Character t2 = previousString.charAt(1);
-                        Operator op1 = new Operator("OPERATOR", t1.toString());
-                        Operator op2 = new Operator("OPERATOR", t2.toString());
-                        System.out.println("OP1: " + op1);
-                        System.out.println("OP2: " + op2);
-                        tokens.add(op1);
-                        tokens.add(op2);
+                        if(statementTerminator.contains(t1.toString())){
+                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t1.toString());
+                            tokens.add(strt);
+                        }
+                        else if (specialChar.contains(t1.toString())) {
+                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t1.toString());
+                            tokens.add(sc);
+                        }
+                        else{
+                            Operator op1 = new Operator("OPERATOR", t1.toString());
+                            tokens.add(op1);
+                        }
+
+                        if(statementTerminator.contains(t2.toString())){
+                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
+                            tokens.add(strt);
+                        }
+                        else if (specialChar.contains(t2.toString())) {
+                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
+                            tokens.add(sc);
+                        }
+                        else{
+                            Operator op2 = new Operator("OPERATOR", t2.toString());
+                            tokens.add(op2);
+                        }
                     }
                 }
                 else if (currentState.equals("5")) {
@@ -74,20 +96,61 @@ public class SmallScan {
                         if(previousString.charAt(0) != ' '){
                             Character t1 = previousString.charAt(0);
                             Character t2 = previousString.charAt(1);
-                            Operator op = new Operator("OPERATOR", t1.toString());
-                            Operator op2 = new Operator("OPERATOR", t2.toString());
-                            tokens.add(op);
-                            tokens.add(op2);
+                            if(statementTerminator.contains(t1.toString())){
+                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t1.toString());
+                                tokens.add(strt);
+                            }
+                            else if (specialChar.contains(t1.toString())) {
+                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t1.toString());
+                                tokens.add(sc);
+                            }
+                            else{
+                                Operator op1 = new Operator("OPERATOR", t1.toString());
+                                tokens.add(op1);
+                            }
+
+                            if(statementTerminator.contains(t2.toString())){
+                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
+                                tokens.add(strt);
+                            }
+                            else if (specialChar.contains(t2.toString())) {
+                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
+                                tokens.add(sc);
+                            }
+                            else{
+                                Operator op2 = new Operator("OPERATOR", t2.toString());
+                                tokens.add(op2);
+                            }
                         }
                         else {
                             Character t2 = previousString.charAt(1);
-                            Operator op2 = new Operator("OPERATOR", t2.toString());
-                            tokens.add(op2);
+                            if(statementTerminator.contains(t2.toString())){
+                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
+                                tokens.add(strt);
+                            }
+                            else if (specialChar.contains(t2.toString())) {
+                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
+                                tokens.add(sc);
+                            }
+                            else{
+                                Operator op2 = new Operator("OPERATOR", t2.toString());
+                                tokens.add(op2);
+                            }
                         }
                     }
                     else{
-                        Operator op = new Operator("OPERATOR", previousString);
-                        tokens.add(op);
+                        if(statementTerminator.contains(previousString)){
+                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", previousString);
+                            tokens.add(strt);
+                        }
+                        else if (specialChar.contains(previousString)) {
+                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", previousString);
+                            tokens.add(sc);
+                        }
+                        else{
+                            Operator op2 = new Operator("OPERATOR", previousString);
+                            tokens.add(op2);
+                        }
                     }
                 }
                 else if (currentState.equals("7")) {
@@ -329,7 +392,7 @@ public class SmallScan {
             return "0";
         }
         else if (state.equals("14")) {
-            return "-1";
+            return "14";
         }
         return "0";
     }
