@@ -11,8 +11,8 @@ public class SmallScan {
     ArrayList<Character> whiteSpace = new ArrayList<>(Arrays.asList(' ', '\n', '\t', '\r'));
     ArrayList<String> keyword = new ArrayList<>(Arrays.asList("program", "program_begin", "integer", "if", "begin", "display", "end", "elseif", "else", "while", "break", "program_end"));
     ArrayList<String> overlapOperator = new ArrayList<>(Arrays.asList("<",">", "=", "!"));
-    ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=","(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
-//    ArrayList<String> overlapperabOperator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=","(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
+    ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", ".", "!"));
+    ArrayList<String> overlappedOperator = new ArrayList<>(Arrays.asList("="));
     ArrayList<String> specialChar = new ArrayList<>(Arrays.asList("(", ")", ","));
     ArrayList<String> statementTerminator = new ArrayList<>(Arrays.asList(";"));
     ArrayList<Token> tokens = new ArrayList<>();
@@ -47,7 +47,8 @@ public class SmallScan {
         for(i = 0; i < oneLine.length(); i++){
             Character oneChar = oneLine.charAt(i);
             currentType = detectCurrentType(oneChar);
-            currentState = calcuateState(previousState, currentType);
+            currentState = calculateState(previousState, currentType);
+
             if(isDelimiter(currentState)){
                 if(currentState.equals("2")){
                     previousString += "\"";
@@ -58,50 +59,17 @@ public class SmallScan {
                 else if (currentState.equals("4")) {
                     previousString += oneChar.toString();
                     i++;
-                    if (operator.contains(previousString)){
-                        Operator op = new Operator("OPERATOR", previousString);
-                        tokens.add(op);
-                    }
-                    else {
-                        Character t1 = previousString.charAt(0);
-                        Character t2 = previousString.charAt(1);
-                        if(statementTerminator.contains(t1.toString())){
-                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t1.toString());
-                            tokens.add(strt);
-                        }
-                        else if (specialChar.contains(t1.toString())) {
-                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t1.toString());
-                            tokens.add(sc);
-                        }
-                        else{
-                            Operator op1 = new Operator("OPERATOR", t1.toString());
-                            tokens.add(op1);
-                        }
 
-                        if(statementTerminator.contains(t2.toString())){
-                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
-                            tokens.add(strt);
-                        }
-                        else if (specialChar.contains(t2.toString())) {
-                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
-                            tokens.add(sc);
-                        }
-                        else{
-                            Operator op2 = new Operator("OPERATOR", t2.toString());
-                            tokens.add(op2);
-                        }
-                    }
+                    Operator op = new Operator("OPERATOR", previousString);
+                    tokens.add(op);
                 }
                 else if (currentState.equals("5")) {
-                    if(statementTerminator.contains(previousString)){
-                        StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", previousString);
-                        tokens.add(strt);
+                    if(previousString.equals("")){                                          // from none
+                        Operator op2 = new Operator("OPERATOR", oneChar.toString());
+                        tokens.add(op2);
+                        i++;
                     }
-                    else if (specialChar.contains(previousString)) {
-                        SpecialChar sc = new SpecialChar("SPECIAL_CHAR", previousString);
-                        tokens.add(sc);
-                    }
-                    else{
+                    else{                                                                   // from state 3
                         Operator op2 = new Operator("OPERATOR", previousString);
                         tokens.add(op2);
                     }
@@ -127,12 +95,51 @@ public class SmallScan {
                     Number num = new Number("NUMBER", previousString);
                     tokens.add(num);
                 }
-                previousString = "";
-                previousState = calcuateState("0", detectCurrentType(oneLine.charAt(i)));
-                if(!previousState.equals("8")){
-                    Character ch = oneLine.charAt(i);
-                    previousString += ch.toString();
+                else if (currentState.equals("14")) {
+                    StatementTerminator statement_terminator = new StatementTerminator("STATEMENT_TERMINATOR", oneChar.toString());
+                    tokens.add(statement_terminator);
+                    i++;
                 }
+                else if (currentState.equals("15")) {
+                    SpecialChar sc = new SpecialChar("SPECIAL_CHAR", oneChar.toString());
+                    tokens.add(sc);
+                    i++;
+                }
+                previousString = "";
+                if(currentState.equals("14") || currentState.equals("15"))
+                    previousState = "0";
+                else{
+                    do {
+                        previousState = calculateState("0", detectCurrentType(oneLine.charAt(i)));
+
+                        Character t = oneLine.charAt(i);
+                        if (previousState.equals("5")) {
+
+                            Operator op2 = new Operator("OPERATOR", t.toString());
+                            tokens.add(op2);
+                            i++;
+                        }
+                        else if (previousState.equals("14")) {
+                            StatementTerminator statement_terminator = new StatementTerminator("STATEMENT_TERMINATOR", t.toString());
+                            tokens.add(statement_terminator);
+                            i++;
+                        }
+                        else if (previousState.equals("15")) {
+                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t.toString());
+                            tokens.add(sc);
+                            i++;
+                        }
+                        else if (previousState.equals("8"))
+                            break;
+                        else {
+                            Character ch = oneLine.charAt(i);
+                            previousString += ch.toString();
+                            break;
+                        }
+                    } while (true);
+
+                }
+
             }
             else{
                 if(!currentState.equals("8"))
@@ -146,7 +153,7 @@ public class SmallScan {
             String tempState = previousState;
             if (tempState.equals("0")){
                 Character ttype = detectCurrentType(previousString.charAt(previousString.length() - 1));
-                tempState = calcuateState(previousState, ttype);
+                tempState = calculateState(previousState, ttype);
             }
             if(tempState.equals("1")){
                 StringLiteral str = new StringLiteral("STRING_LITEAL", previousString);
@@ -170,7 +177,7 @@ public class SmallScan {
                 Number num = new Number("NUMBER", previousString);
                 tokens.add(num);
             }
-            else if (tempState.equals("14")){
+            else if (tempState.equals("16")){
                 Token token = new Token("UNKNOWN", previousString);
                 tokens.add(token);
             }
@@ -223,6 +230,20 @@ public class SmallScan {
         return false;
     }
 
+    private boolean isStateTerminator(Character ch){
+        if(statementTerminator.contains(ch.toString())) return true;
+        return false;
+    }
+
+    private boolean isSpecialChar(Character ch){
+        if(specialChar.contains(ch.toString())) return true;
+        return false;
+    }
+
+    private boolean isOverlapped(Character ch){
+        if(overlappedOperator.contains(ch.toString())) return true;
+        return false;
+    }
     private boolean isWhiteSpace(Character ch){
         if(whiteSpace.contains(ch)) return true;
         return false;
@@ -231,31 +252,37 @@ public class SmallScan {
     private Character detectCurrentType(Character ch){
         if(isDigit(ch)) return 'D';
         else if (isLetter(ch)) return 'L';
-        else if (isOverlapOperator(ch)) return 'V';
+        else if (isOverlapped(ch)) return 'E';               // =
+        else if (isOverlapOperator(ch)) return 'V';          // = < > !
         else if (isDot(ch)) return 'T';
         else if (isQuote(ch)) return 'Q';
         else if (isUnderbar(ch)) return 'U';
         else if (isOperator(ch)) return 'O';
+        else if (isStateTerminator(ch)) return 'S';
+        else if (isSpecialChar(ch)) return 'P';
         else if (isWhiteSpace(ch)) return  'W';
         else return 'N';
     }
 
     private boolean isDelimiter(String str){
-        if(str.equals("2") || str.equals("4") || str.equals("5") || str.equals("7") || str.equals("9") || str.equals("12") || str.equals("13")) return true;
+        if(str.equals("2") || str.equals("4") || str.equals("5") || str.equals("7") || str.equals("9") || str.equals("12") || str.equals("13") || str.equals("14") || str.equals("15")) return true;
         return false;
     }
 
-    private String calcuateState(String state, Character type){     // T
+    private String calculateState(String state, Character type){     // T
         if(state.equals("0")){
             if (type == 'D') return "10";
             else if (type == 'L') return "6";
             else if (type == 'V') return "3";
             else if (type == 'T') return "3";
             else if (type == 'Q') return "1";
-            else if (type == 'U') return "14";
-            else if (type == 'O') return "3";
+            else if (type == 'U') return "16";
+            else if (type == 'O') return "5";
+            else if (type == 'S') return "14";
+            else if (type == 'P') return "15";
+            else if (type == 'E') return "3";
             else if (type == 'W') return "8";
-            else return "14";
+            else return "16";
         }
         else if (state.equals("1")) {
             if (type == 'D') return "1";
@@ -265,6 +292,9 @@ public class SmallScan {
             else if (type == 'Q') return "2";
             else if (type == 'U') return "1";
             else if (type == 'O') return "1";
+            else if (type == 'S') return "1";
+            else if (type == 'P') return "1";
+            else if (type == 'E') return "1";
             else if (type == 'W') return "1";
             else return "1";
         }
@@ -274,11 +304,14 @@ public class SmallScan {
         else if (state.equals("3")) {
             if (type == 'D') return "5";
             else if (type == 'L') return "5";
-            else if (type == 'V') return "4";
+            else if (type == 'V') return "5";
             else if (type == 'T') return "5";
             else if (type == 'Q') return "5";
             else if (type == 'U') return "5";
             else if (type == 'O') return "5";
+            else if (type == 'S') return "5";
+            else if (type == 'P') return "5";
+            else if (type == 'E') return "4";
             else if (type == 'W') return "5";
             else return "5";
         }
@@ -296,6 +329,9 @@ public class SmallScan {
             else if (type == 'Q') return "7";
             else if (type == 'U') return "6";
             else if (type == 'O') return "7";
+            else if (type == 'S') return "7";
+            else if (type == 'P') return "7";
+            else if (type == 'E') return "7";
             else if (type == 'W') return "7";
             else return "7";
         }
@@ -310,6 +346,9 @@ public class SmallScan {
             else if (type == 'Q') return "9";
             else if (type == 'U') return "9";
             else if (type == 'O') return "9";
+            else if (type == 'S') return "9";
+            else if (type == 'P') return "9";
+            else if (type == 'E') return "9";
             else if (type == 'W') return "8";
             else return "9";
         }
@@ -324,6 +363,9 @@ public class SmallScan {
             else if (type == 'Q') return "12";
             else if (type == 'U') return "12";
             else if (type == 'O') return "12";
+            else if (type == 'S') return "12";
+            else if (type == 'P') return "12";
+            else if (type == 'E') return "12";
             else if (type == 'W') return "12";
             else return "12";
         }
@@ -335,6 +377,9 @@ public class SmallScan {
             else if (type == 'Q') return "13";
             else if (type == 'U') return "13";
             else if (type == 'O') return "13";
+            else if (type == 'S') return "13";
+            else if (type == 'P') return "13";
+            else if (type == 'E') return "13";
             else if (type == 'W') return "13";
             else return "13";
         }
@@ -345,7 +390,13 @@ public class SmallScan {
             return "0";
         }
         else if (state.equals("14")) {
-            return "14";
+            return "0";
+        }
+        else if (state.equals("15")) {
+            return "0";
+        }
+        else if (state.equals("16")) {
+            return "16";
         }
         return "0";
     }
