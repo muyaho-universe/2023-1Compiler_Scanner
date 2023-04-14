@@ -8,10 +8,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class SmallScan {
-    ArrayList<Character> whiteSpace = new ArrayList<>(Arrays.asList(' ', '\n', '\t'));
-    ArrayList<String> keyword = new ArrayList<>(Arrays.asList("program", "program_begin", "integer", "if", "begin", "display", "end", "elesif", "else", "while", "break", "program_end"));
+    ArrayList<Character> whiteSpace = new ArrayList<>(Arrays.asList(' ', '\n', '\t', '\r'));
+    ArrayList<String> keyword = new ArrayList<>(Arrays.asList("program", "program_begin", "integer", "if", "begin", "display", "end", "elseif", "else", "while", "break", "program_end"));
     ArrayList<String> overlapOperator = new ArrayList<>(Arrays.asList("<",">", "=", "!"));
     ArrayList<String> operator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=","(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
+//    ArrayList<String> overlapperabOperator = new ArrayList<>(Arrays.asList("+", "-", "*", "/", "<", ">", "=","(", ")", ",", ".", ";", "==", "<=", ">=", "!=", "!"));
     ArrayList<String> specialChar = new ArrayList<>(Arrays.asList("(", ")", ","));
     ArrayList<String> statementTerminator = new ArrayList<>(Arrays.asList(";"));
     ArrayList<Token> tokens = new ArrayList<>();
@@ -92,65 +93,17 @@ public class SmallScan {
                     }
                 }
                 else if (currentState.equals("5")) {
-                    if (previousString.length() >= 2){
-                        if(previousString.charAt(0) != ' '){
-                            Character t1 = previousString.charAt(0);
-                            Character t2 = previousString.charAt(1);
-                            if(statementTerminator.contains(t1.toString())){
-                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t1.toString());
-                                tokens.add(strt);
-                            }
-                            else if (specialChar.contains(t1.toString())) {
-                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t1.toString());
-                                tokens.add(sc);
-                            }
-                            else{
-                                Operator op1 = new Operator("OPERATOR", t1.toString());
-                                tokens.add(op1);
-                            }
-
-                            if(statementTerminator.contains(t2.toString())){
-                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
-                                tokens.add(strt);
-                            }
-                            else if (specialChar.contains(t2.toString())) {
-                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
-                                tokens.add(sc);
-                            }
-                            else{
-                                Operator op2 = new Operator("OPERATOR", t2.toString());
-                                tokens.add(op2);
-                            }
-                        }
-                        else {
-                            Character t2 = previousString.charAt(1);
-                            if(statementTerminator.contains(t2.toString())){
-                                StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", t2.toString());
-                                tokens.add(strt);
-                            }
-                            else if (specialChar.contains(t2.toString())) {
-                                SpecialChar sc = new SpecialChar("SPECIAL_CHAR", t2.toString());
-                                tokens.add(sc);
-                            }
-                            else{
-                                Operator op2 = new Operator("OPERATOR", t2.toString());
-                                tokens.add(op2);
-                            }
-                        }
+                    if(statementTerminator.contains(previousString)){
+                        StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", previousString);
+                        tokens.add(strt);
+                    }
+                    else if (specialChar.contains(previousString)) {
+                        SpecialChar sc = new SpecialChar("SPECIAL_CHAR", previousString);
+                        tokens.add(sc);
                     }
                     else{
-                        if(statementTerminator.contains(previousString)){
-                            StatementTerminator strt = new StatementTerminator("STATEMENT_TERMINATOR", previousString);
-                            tokens.add(strt);
-                        }
-                        else if (specialChar.contains(previousString)) {
-                            SpecialChar sc = new SpecialChar("SPECIAL_CHAR", previousString);
-                            tokens.add(sc);
-                        }
-                        else{
-                            Operator op2 = new Operator("OPERATOR", previousString);
-                            tokens.add(op2);
-                        }
+                        Operator op2 = new Operator("OPERATOR", previousString);
+                        tokens.add(op2);
                     }
                 }
                 else if (currentState.equals("7")) {
